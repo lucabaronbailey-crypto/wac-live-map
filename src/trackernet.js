@@ -2,8 +2,6 @@ import fetch from 'node-fetch';
 import { XMLParser } from 'fast-xml-parser';
 
 const TFL_API_KEY = 'e8924bb596cb4425b134304c7106e5fe';
-
-// 3-letter TrackerNet station codes for Waterloo & City line
 const TRACKERNET_STATIONS = ['BNK', 'WLO'];
 
 export async function fetchLiveTrains() {
@@ -25,16 +23,19 @@ export async function fetchLiveTrains() {
       if (!xml) continue;
       const parsed = parser.parse(xml);
       
-      const stations = parsed.root?.S || [];
+      // Support uppercase <ROOT> tag returned by TrackerNet
+      const rootNode = parsed.ROOT || parsed.root || {};
+      const stations = rootNode.S || [];
       const stationArray = Array.isArray(stations) ? stations : [stations];
 
       for (const station of stationArray) {
+        if (!station) continue;
         const stationName = station['@_N'] || '';
         const stationCode = station['@_Code'] || '';
         const platforms = station.P ? (Array.isArray(station.P) ? station.P : [station.P]) : [];
 
         for (const p of platforms) {
-          if (!p.T) continue;
+          if (!p || !p.T) continue;
           const trains = Array.isArray(p.T) ? p.T : [p.T];
 
           for (const t of trains) {
