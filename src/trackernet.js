@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { XMLParser } from 'fast-xml-parser';
 
-const URL = 'http://cloud.tfl.gov.uk/TrackerNet/PredictionDetailed/W';
+const URL = 'https://api.tfl.gov.uk/TrackerNet/PredictionDetailed/W';
 
 export async function fetchLiveTrains() {
   try {
