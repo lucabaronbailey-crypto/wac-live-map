@@ -1,27 +1,25 @@
 import fetch from 'node-fetch';
 import { XMLParser } from 'fast-xml-parser';
 
-// Correct domain: trackernet.tfl.gov.uk
 const TFL_API_KEY = 'e8924bb596cb4425b134304c7106e5fe';
-const URL = `http://trackernet.tfl.gov.uk/PredictionDetailed/W?app_key=${TFL_API_KEY}`;
+// Line 'W' without a station code fetches the entire line
+const URL = `https://api.tfl.gov.uk/trackernet/PredictionDetailed/W?app_key=${TFL_API_KEY}`;
 
 export async function fetchLiveTrains() {
   try {
     const res = await fetch(URL, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0'
-      }
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     });
 
     if (!res.ok) {
-      console.error(`TrackerNet HTTP Error: ${res.status}`);
+      console.error(`TrackerNet Error: ${res.status}`);
       return [];
     }
 
     const xml = await res.text();
     const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
     const parsed = parser.parse(xml);
-    
+
     const stations = parsed.root?.S || [];
     const stationArray = Array.isArray(stations) ? stations : [stations];
     const rawTrains = [];
@@ -40,20 +38,15 @@ export async function fetchLiveTrains() {
         for (const t of trains) {
           const set = t['@_S'];
           const num = t['@_T'];
-          const loc = t['@_L'] || '';
-          const dest = t['@_D'] || '';
-
-          const displayLabel = (set && set !== '0') ? set : ((num && num !== '0') ? num : `TRN${fallbackCounter++}`);
 
           rawTrains.push({
-            id: `${stationCode}-${p['@_Code'] || '0'}-${displayLabel}-${Math.random()}`,
-            setNumber: displayLabel,
-            trainNumber: num || '0',
-            destination: dest || 'No Destination Data',
-            currentLocation: loc || `At ${stationName}`,
+            id: `${stationCode}-${p['@_Code'] || '0'}-${Math.random()}`,
+            setNumber: (set && set !== '0') ? set : `TRN${fallbackCounter++}`,
+            trainNumber: num || '000',
+            destination: t['@_D'] || 'No Destination Data',
+            currentLocation: t['@_L'] || `At ${stationName}`,
             stationCode: stationCode,
             platformName: p['@_N'] || '',
-            locationCode: t['@_LC'] || '',
             secondsToStation: parseInt(t['@_C'], 10) || 0
           });
         }
