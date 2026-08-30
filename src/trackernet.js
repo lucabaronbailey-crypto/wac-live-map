@@ -1,14 +1,15 @@
 import fetch from 'node-fetch';
 import { XMLParser } from 'fast-xml-parser';
 
-// Updated HTTPS endpoint
-const URL = 'https://api.tfl.gov.uk/TrackerNet/PredictionDetailed/W';
+// Insert your key from the TfL Developer Portal here
+const TFL_API_KEY = 'e8924bb596cb4425b134304c7106e5fe';
+const URL = `https://api.tfl.gov.uk/TrackerNet/PredictionDetailed/W?app_key=${TFL_API_KEY}`;
 
 export async function fetchLiveTrains() {
   try {
     const res = await fetch(URL, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        'User-Agent': 'Mozilla/5.0'
       }
     });
 
