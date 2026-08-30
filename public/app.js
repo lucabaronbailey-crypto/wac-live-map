@@ -2,36 +2,25 @@ const canvas = document.getElementById('trackCanvas');
 const ctx = canvas.getContext('2d');
 
 const bgImage = new Image();
-
-// Standard width/height fallbacks if image is loading
-canvas.width = 1200;
-canvas.height = 675;
-
-bgImage.onload = () => {
-  canvas.width = bgImage.naturalWidth || 1200;
-  canvas.height = bgImage.naturalHeight || 675;
-  render();
-};
-
-// Log error to browser console if image path fails
-bgImage.onerror = () => {
-  console.error('Failed to load track diagram image at:', bgImage.src);
-};
-
-// Set source after defining handlers
-bgImage.src = '/assets/W&C.png';
+bgImage.src = '/assets/W&C.jpg';
 
 let currentTrains = [];
+let isConnected = false;
 
 bgImage.onload = () => {
-  canvas.width = bgImage.naturalWidth || 1200;
-  canvas.height = bgImage.naturalHeight || 675;
+  // Use natural image dimensions for coordinate accuracy
+  canvas.width = bgImage.naturalWidth || 1920;
+  canvas.height = bgImage.naturalHeight || 1080;
   render();
 };
 
-// Automatically uses wss:// on secure web links
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const ws = new WebSocket(`${protocol}//${window.location.host}`);
+
+ws.onopen = () => {
+  isConnected = true;
+  render();
+};
 
 ws.onmessage = (event) => {
   currentTrains = JSON.parse(event.data);
@@ -39,9 +28,27 @@ ws.onmessage = (event) => {
 };
 
 function render() {
+  // Clear and redraw background diagram
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(bgImage, 0, 0);
+  if (bgImage.complete && bgImage.naturalWidth !== 0) {
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+  }
 
+  // Draw status text
+  ctx.font = 'bold 16px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = isConnected ? '#00FF00' : '#FF0000';
+  ctx.fillText(isConnected ? '● LIVE TRACKERNET CONNECTED' : '○ DISCONNECTED', 20, 30);
+
+  // Fallback indicator if no active trains are detected on the line
+  if (currentTrains.length === 0) {
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '14px monospace';
+    ctx.fillText('No active trains currently detected on W&C line.', 20, 55);
+    return;
+  }
+
+  // Draw active trains
   currentTrains.forEach(train => {
     const isPassenger = train.destination !== 'Out of Service' && train.destination !== 'Depot';
 
