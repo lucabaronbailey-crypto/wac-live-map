@@ -1,11 +1,22 @@
 import fetch from 'node-fetch';
 import { XMLParser } from 'fast-xml-parser';
 
+// Updated HTTPS endpoint
 const URL = 'https://api.tfl.gov.uk/TrackerNet/PredictionDetailed/W';
 
 export async function fetchLiveTrains() {
   try {
-    const res = await fetch(URL);
+    const res = await fetch(URL, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      }
+    });
+
+    if (!res.ok) {
+      console.error(`TrackerNet HTTP Error: ${res.status}`);
+      return [];
+    }
+
     const xml = await res.text();
     const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
     const parsed = parser.parse(xml);
@@ -31,7 +42,6 @@ export async function fetchLiveTrains() {
           const loc = t['@_L'] || '';
           const dest = t['@_D'] || '';
 
-          // Generate an identifier even if Set/Train numbers are missing or zero
           const displayLabel = (set && set !== '0') ? set : ((num && num !== '0') ? num : `TRN${fallbackCounter++}`);
 
           rawTrains.push({
