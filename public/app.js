@@ -2,6 +2,23 @@ const canvas = document.getElementById('trackCanvas');
 const ctx = canvas.getContext('2d');
 
 const bgImage = new Image();
+
+// Standard width/height fallbacks if image is loading
+canvas.width = 1200;
+canvas.height = 675;
+
+bgImage.onload = () => {
+  canvas.width = bgImage.naturalWidth || 1200;
+  canvas.height = bgImage.naturalHeight || 675;
+  render();
+};
+
+// Log error to browser console if image path fails
+bgImage.onerror = () => {
+  console.error('Failed to load track diagram image at:', bgImage.src);
+};
+
+// Set source after defining handlers
 bgImage.src = '/assets/W&C.jpg';
 
 let currentTrains = [];
