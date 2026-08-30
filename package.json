@@ -1,0 +1,16 @@
+{
+  "name": "wac-live-map",
+  "version": "1.0.0",
+  "description": "Live signal diagram tracking map for the Waterloo & City line using TfL TrackerNet.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "fast-xml-parser": "^4.3.5",
+    "node-fetch": "^3.3.2",
+    "ws": "^8.16.0"
+  }
+}
