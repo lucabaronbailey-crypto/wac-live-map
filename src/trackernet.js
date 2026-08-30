@@ -3,15 +3,14 @@ import { XMLParser } from 'fast-xml-parser';
 
 const TFL_API_KEY = 'e8924bb596cb4425b134304c7106e5fe';
 
-// Waterloo & City line station codes required by TrackerNet
-const STATIONS = ['WLO', 'BNK'];
+// 3-letter TrackerNet station codes for Waterloo & City line
+const TRACKERNET_STATIONS = ['BNK', 'WLO'];
 
 export async function fetchLiveTrains() {
   try {
     const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
     
-    // Fetch detailed predictions for both Waterloo and Bank simultaneously
-    const requests = STATIONS.map(code =>
+    const requests = TRACKERNET_STATIONS.map(code =>
       fetch(`https://api.tfl.gov.uk/TrackerNet/PredictionDetailed/W/${code}?app_key=${TFL_API_KEY}`, {
         headers: { 'User-Agent': 'Mozilla/5.0' }
       }).then(res => (res.ok ? res.text() : null))
@@ -43,7 +42,6 @@ export async function fetchLiveTrains() {
             const num = t['@_T'];
             const displayLabel = (set && set !== '0') ? set : ((num && num !== '0') ? num : `TRN${fallbackCounter++}`);
             
-            // Prevent duplicate entries if a train appears in both station buffers
             const uniqueKey = `${stationCode}-${p['@_Code'] || '0'}-${displayLabel}`;
             if (seenKeys.has(uniqueKey)) continue;
             seenKeys.add(uniqueKey);
