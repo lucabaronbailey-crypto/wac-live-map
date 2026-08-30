@@ -1,9 +1,9 @@
 import fetch from 'node-fetch';
 import { XMLParser } from 'fast-xml-parser';
 
-// Insert your key from the TfL Developer Portal here
+// Correct HTTPS TrackerNet endpoint + your portal API key
 const TFL_API_KEY = 'e8924bb596cb4425b134304c7106e5fe';
-const URL = `https://api.tfl.gov.uk/TrackerNet/PredictionDetailed/W?app_key=${TFL_API_KEY}`;
+const URL = `https://cloud.tfl.gov.uk/TrackerNet/PredictionDetailed/W?app_key=${TFL_API_KEY}`;
 
 export async function fetchLiveTrains() {
   try {
