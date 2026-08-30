@@ -5,22 +5,15 @@ const bgImage = new Image();
 bgImage.src = '/assets/W&C.jpg';
 
 let currentTrains = [];
-let isConnected = false;
 
 bgImage.onload = () => {
-  // Use natural image dimensions for coordinate accuracy
-  canvas.width = bgImage.naturalWidth || 1920;
-  canvas.height = bgImage.naturalHeight || 1080;
+  canvas.width = bgImage.naturalWidth || 1200;
+  canvas.height = bgImage.naturalHeight || 675;
   render();
 };
 
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const ws = new WebSocket(`${protocol}//${window.location.host}`);
-
-ws.onopen = () => {
-  isConnected = true;
-  render();
-};
 
 ws.onmessage = (event) => {
   currentTrains = JSON.parse(event.data);
@@ -28,27 +21,13 @@ ws.onmessage = (event) => {
 };
 
 function render() {
-  // Clear and redraw background diagram
+  // 1. Draw the signal diagram background
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (bgImage.complete && bgImage.naturalWidth !== 0) {
     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
   }
 
-  // Draw status text
-  ctx.font = 'bold 16px monospace';
-  ctx.textAlign = 'left';
-  ctx.fillStyle = isConnected ? '#00FF00' : '#FF0000';
-  ctx.fillText(isConnected ? '● LIVE TRACKERNET CONNECTED' : '○ DISCONNECTED', 20, 30);
-
-  // Fallback indicator if no active trains are detected on the line
-  if (currentTrains.length === 0) {
-    ctx.fillStyle = '#AAAAAA';
-    ctx.font = '14px monospace';
-    ctx.fillText('No active trains currently detected on W&C line.', 20, 55);
-    return;
-  }
-
-  // Draw active trains
+  // 2. Loop directly over trains (if array is empty, this simply does nothing)
   currentTrains.forEach(train => {
     const isPassenger = train.destination !== 'Out of Service' && train.destination !== 'Depot';
 
