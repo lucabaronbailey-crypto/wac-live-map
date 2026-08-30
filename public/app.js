@@ -19,7 +19,7 @@ bgImage.onerror = () => {
 };
 
 // Set source after defining handlers
-bgImage.src = '/assets/W&C.jpg';
+bgImage.src = '/assets/W&C.png';
 
 let currentTrains = [];
 
